@@ -14,6 +14,11 @@
     "jest": "^26.5.3"
   },
   "scripts": {
+    "build-core-native": "cargo build --manifest-path ./core/Cargo.toml",
+    "build-core-wasm": "wasm-pack build core",
+    "build-core": "npm run build-core-native && npm run build-core-wasm",
+    "build-typescript": "tsc",
+    "clean": "rm -rf dist",
     "test": "jest"
   },
   "repository": {
