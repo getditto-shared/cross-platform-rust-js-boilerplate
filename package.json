@@ -1,0 +1,29 @@
+{
+  "name": "cross-platform-rust-js-boilerplate",
+  "version": "1.0.0",
+  "description": "A cross platform javascript library with a rust code base for web browsers, node, and react-native",
+  "main": "dist/node/index.js",
+  "browser": "dist/browser/index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-typescript": "^7.10.4",
+    "@types/jest": "^26.0.14",
+    "babel-jest": "^26.5.2",
+    "jest": "^26.5.3"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getditto/cross-platform-rust-js-boilerplate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/getditto/cross-platform-rust-js-boilerplate/issues"
+  },
+  "homepage": "https://github.com/getditto/cross-platform-rust-js-boilerplate#readme"
+}
