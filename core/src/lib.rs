@@ -1,10 +1,13 @@
-use futures::future::Future;
+use async_trait::async_trait;
 
+#[async_trait]
 pub trait Store {
-    fn new(name: &'static str) -> Self;
+    fn new(name: &str) -> Self;
     
-    fn get(&self, key: &'static str) -> Future<Item=String, Error=()>;
-    fn put(&self, key: &'static str, key: &'static str) -> Future<Item=(), Error=()>;
+    async fn get(&self, key: &str) -> Result<String, ()>;
+    async fn put(&self, key: &str, value: &str) -> Result<(), ()>;
     
     fn clear(&self);
 }
+
+

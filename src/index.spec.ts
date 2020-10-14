@@ -1,10 +1,11 @@
 import { Store } from "./common"
 
+
 describe('basic storage tests', () => {
   
   let store: Store = undefined;
   
-  beforeAll(() => {
+  beforeAll(() => {    
     // todo initialize the store. 
     // store = new Store()
   })
