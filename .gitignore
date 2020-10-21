@@ -2,4 +2,4 @@ dist
 node_modules
 **/target
 pkg
-*.node
+pkg-*

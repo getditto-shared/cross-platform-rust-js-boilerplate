@@ -1,6 +1,6 @@
 # Cross Platform JavaScript (TypeScript) Repo for Rust
 
-This library shows you how to take a Rust library, compile it for WASM and as a Native Binary and use it as an NPM package with the same interface. In addition, it'll run the same Jest integration tests on all runtimes. 
+This library shows you how to take a Rust library, compile it for WASM and as a Native Binary and use it as an NPM package with the same interface. In addition, it'll run the same Jest integration tests on all runtimes.
 
 This simple library is a key value store that will use a different embedded key value store depending on the platform:
 
