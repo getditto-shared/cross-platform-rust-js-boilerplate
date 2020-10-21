@@ -39,8 +39,6 @@
     "build-core-wasm": "wasm-pack build -t web --out-dir ../src/web web",
     "build-core": "npm run build-core-native && npm run build-core-wasm && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/cjs/. && cp ./native/*.node ./dist/node/es/.",
     "build-typescript": "./node_modules/.bin/tsc",
-    "build-core-wasm-node": "wasm-pack build core --target nodejs --out-dir pkg-node",
-    "build-core-wasm-bundler": "wasm-pack build core --target bundler --out-dir pkg-bundler",
     "clean": "rm -rf dist",
     "test": "jest && npm run test-web",
     "test-web": "karmatic '**/*.spec.ts'"

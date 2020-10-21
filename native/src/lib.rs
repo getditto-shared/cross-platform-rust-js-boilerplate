@@ -13,13 +13,6 @@ pub struct InMemoryStore {
 
 #[async_trait]
 impl Store for InMemoryStore {
-    fn new(_name: &str) -> Self {
-        // TODO: use global hash table and reference the entries by name
-        // (so it can be "opened" later on, as with a real implementation
-        // persisting contents).
-        Self { entries: HashMap::new() }
-    }
-
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         let result = self.entries.get(&key.to_string());
         match result {
@@ -37,6 +30,15 @@ impl Store for InMemoryStore {
     fn clear(&mut self) {
         // TODO: this should probably be async too.
         self.entries.clear()
+    }
+}
+
+impl InMemoryStore {
+    fn new(_name: &str) -> Self {
+        // TODO: use global hash table and reference the entries by name
+        // (so it can be "opened" later on, as with a real implementation
+        // persisting contents).
+        Self { entries: HashMap::new() }
     }
 }
 
