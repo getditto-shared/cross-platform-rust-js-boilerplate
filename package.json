@@ -19,6 +19,8 @@
     "build-core-wasm": "wasm-pack build core",
     "build-core": "npm run build-core-native && npm run build-core-wasm",
     "build-typescript": "./node_modules/.bin/tsc",
+    "build-core-wasm-node": "wasm-pack build core --target nodejs --out-dir pkg-node",
+    "build-core-wasm-bundler": "wasm-pack build core --target bundler --out-dir pkg-bundler",
     "clean": "rm -rf dist",
     "test": "jest"
   },

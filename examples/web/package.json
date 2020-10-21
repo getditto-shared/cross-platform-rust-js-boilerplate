@@ -1,0 +1,28 @@
+{
+  "name": "web-example",
+  "version": "0.1.0",
+  "description": "A simple web app demonstrating the use of Ditto.JS purely in the browser.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "webpack-dev-server"
+  },
+  "keywords": [
+    "webassembly",
+    "wasm",
+    "rust",
+    "webpack"
+  ],
+  "author": "Konstantin Bender <me@konstantinbender.com>",
+  "license": "(MIT OR Apache-2.0)",
+  "dependencies": {
+    "core": "file:../../core/pkg-bundler"
+  },
+  "devDependencies": {
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5",
+    "copy-webpack-plugin": "^5.0.0"
+  }
+}

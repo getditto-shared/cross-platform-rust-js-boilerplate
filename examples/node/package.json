@@ -1,0 +1,17 @@
+{
+  "name": "node-example",
+  "version": "0.1.0",
+  "description": "A simple web app demonstrating the use of Ditto.JS in Node.JS.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "license": "(MIT OR Apache-2.0)",
+  "author": "Konstantin Bender <me@konstantinbender.com>",
+  "dependencies": {
+    "core": "file:../../core/pkg-node"
+  },
+  "devDependencies": {}
+}

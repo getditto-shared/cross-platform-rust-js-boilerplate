@@ -1,29 +1,27 @@
-import { Store } from "./common"
-
+import { Store } from "./common";
 
 describe('basic storage tests', () => {
-  
-  let store: Store = undefined;
-  
-  beforeAll(() => {    
-    // todo initialize the store. 
+  let store: Store = new Store("test");
+
+  beforeAll(() => {
+    // todo initialize the store.
     // store = new Store()
-  })
-  
+  });
+
   it("should be able to write and get a value at a key", async () => {
     let key = generateUUID();
-    let valToInsert = generateUUID();
+    let valueToInsert = generateUUID();
     {
-      const val = await store.get(key);  
-      expect(val).toBeUndefined();
+      const value = await store.get(key);
+      expect(value).toBeUndefined();
     }
     {
-      await store.put(key, valToInsert);
-      const val = await store.get(key);  
-      expect(val).toEqual(valToInsert);
+      await store.put(key, valueToInsert);
+      const value = await store.get(key);
+      expect(value).toEqual(valueToInsert);
     }
-  })
-})
+  });
+});
 
 /**
  * This is just a utility function to generate a UUID
