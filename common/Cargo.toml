@@ -1,0 +1,9 @@
+[package]
+name = "common"
+version = "0.1.0"
+authors = ["Maximilian Alexander <max@ditto.live>"]
+edition = "2018"
+
+[dependencies]
+futures = "0.3"
+async-trait = "0.1"

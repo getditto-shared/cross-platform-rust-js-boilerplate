@@ -1,4 +1,5 @@
 dist
 node_modules
-core/target
+**/target
 pkg
+*.node

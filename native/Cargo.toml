@@ -1,0 +1,17 @@
+[package]
+name = "core-native"
+version = "0.1.0"
+authors = ["Maximilian Alexander <max@ditto.live>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+common = { path = "../common" }
+napi = "0.5"
+napi-derive = "0.5"
+async-trait = "0.1"
+
+[build-dependencies]
+napi-build = "0.2"
