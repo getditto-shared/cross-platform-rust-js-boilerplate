@@ -1,27 +1,11 @@
 use async_trait::async_trait;
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::*;
-
 use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
-
 use js_sys::Promise;
-
-// -----------------------------------------------------------------------------
-
-#[async_trait]
-pub trait Store {
-    fn new(name: &str) -> Self;
-
-    async fn get(&self, key: &str) -> Result<Option<String>, ()>;
-    async fn put(&mut self, key: &str, value: &str) -> Result<(), ()>;
-
-    fn clear(&mut self);
-}
-
-// -----------------------------------------------------------------------------
+use common::Store;
 
 #[derive(Debug)]
 pub struct InMemoryStore {
@@ -56,18 +40,6 @@ impl Store for InMemoryStore {
         self.entries.clear()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_example() {
-        // Nothing here yet, all good.
-    }
-}
-
-// -----------------------------------------------------------------------------
 
 #[wasm_bindgen]
 pub struct JSStore {
@@ -120,5 +92,13 @@ impl JSStore {
     pub fn clear(&self) {
         let mut store = self.store.borrow_mut();
         store.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_example() {
+        // Nothing here yet, all good.
     }
 }

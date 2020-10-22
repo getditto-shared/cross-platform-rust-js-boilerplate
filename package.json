@@ -2,22 +2,38 @@
   "name": "cross-platform-rust-js-boilerplate",
   "version": "1.0.0",
   "description": "A cross platform javascript library with a rust code base for web browsers, node, and react-native",
-  "main": "dist/node/index.js",
-  "browser": "dist/browser/index.js",
+  "main": "./dist/node/cjs/index_node.js",
+  "module": "./dist/node/es/index_node.js",
+  "browser": {
+    "./dist/node/cjs/index_node.js": "./dist/browser/cjs/index_browser.js",
+    "./dist/node/es/index_node.js": "./dist/browser/es/index_browser.js"
+  },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-typescript": "^7.10.4",
+    "@rollup/plugin-typescript": "^6.0.0",
+    "@rollup/plugin-wasm": "^5.1.0",
     "@types/jest": "^26.0.14",
     "babel-jest": "^26.5.2",
     "jest": "^26.5.3",
+    "napi-rs": "^0.3.9",
+    "rollup": "^2.32.1",
     "typescript": "^4.0.3"
   },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "napi": {
+    "name": "cross-platform-rust-js-boilerplate"
+  },
   "scripts": {
-    "build-core-native": "cargo build --manifest-path ./core/Cargo.toml",
-    "build-core-wasm": "wasm-pack build core",
-    "build-core": "npm run build-core-native && npm run build-core-wasm",
+    "build-core-native": "cd native && cargo build --release && napi build -c ../package.json --platform --release",
+    "build-core-wasm": "wasm-pack build -t web --out-dir ../src/web web",
+    "build-core": "npm run build-core-native && npm run build-core-wasm && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/cjs/. && cp ./native/*.node ./dist/node/es/.",
     "build-typescript": "./node_modules/.bin/tsc",
     "clean": "rm -rf dist",
     "test": "jest"
