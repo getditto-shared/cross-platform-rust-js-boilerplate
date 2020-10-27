@@ -29,6 +29,13 @@ const rolls = (fmt, platform) => ({
           path.resolve(`src/web/core_web.js`),
           data.replace("import.meta.url", "input")
         );
+
+        // Copy over the typescript definitions from the wasm implementation
+        fs.mkdirSync(path.resolve(`dist/${platform}/${fmt}/web`), { recursive: true });
+        fs.copyFileSync(
+          path.resolve("./src/web/core_web.d.ts"),
+          path.resolve(`dist/${platform}/${fmt}/web/core_web.d.ts`)
+        );
       },
     },
   ],
