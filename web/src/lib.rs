@@ -1,6 +1,8 @@
 use async_trait::async_trait;
 
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+
 use wasm_bindgen_futures::*;
 
 use common::Store;
@@ -16,7 +18,6 @@ use futures::future::FutureExt;
 use futures::pin_mut;
 
 use js_sys::Promise;
-use js_sys::Function;
 
 use web_sys::Event;
 use web_sys::IdbDatabase;
@@ -96,8 +97,8 @@ impl Store for IndexedDBStore {
             on_success_sender.send(Ok(())).unwrap();
         });
 
-        get_request.set_onerror(Function::try_from(on_error_closure.as_ref()));
-        get_request.set_onsuccess(Function::try_from(on_success_closure.as_ref()));
+        get_request.set_onerror(on_error_closure.as_ref().dyn_ref());
+        get_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
 
         let on_error_receiver_fused = on_error_receiver.fuse();
         let on_success_receiver_fused = on_success_receiver.fuse();
@@ -155,8 +156,8 @@ impl Store for IndexedDBStore {
             on_success_sender.send(Ok(())).unwrap();
         });
 
-        put_request.set_onerror(Function::try_from(on_error_closure.as_ref()));
-        put_request.set_onsuccess(Function::try_from(on_success_closure.as_ref()));
+        put_request.set_onerror(on_error_closure.as_ref().dyn_ref());
+        put_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
 
         let on_error_receiver_fused = on_error_receiver.fuse();
         let on_success_receiver_fused = on_success_receiver.fuse();
@@ -197,8 +198,8 @@ impl Store for IndexedDBStore {
             on_success_sender.send(Ok(())).unwrap();
         });
 
-        clear_request.set_onerror(Function::try_from(on_error_closure.as_ref()));
-        clear_request.set_onsuccess(Function::try_from(on_success_closure.as_ref()));
+        clear_request.set_onerror(on_error_closure.as_ref().dyn_ref());
+        clear_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
 
         let on_error_receiver_fused = on_error_receiver.fuse();
         let on_success_receiver_fused = on_success_receiver.fuse();
@@ -254,9 +255,9 @@ impl IndexedDBStore {
             on_success_sender.send(Ok(())).unwrap();
         });
 
-        open_db_request.set_onupgradeneeded(Function::try_from(on_upgrade_needed_closure.as_ref()));
-        open_db_request.set_onerror(Function::try_from(on_error_closure.as_ref()));
-        open_db_request.set_onsuccess(Function::try_from(on_success_closure.as_ref()));
+        open_db_request.set_onupgradeneeded(on_upgrade_needed_closure.as_ref().dyn_ref());
+        open_db_request.set_onerror(on_error_closure.as_ref().dyn_ref());
+        open_db_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
 
         let on_error_receiver_fused = on_error_receiver.fuse();
         let on_success_receiver_fused = on_success_receiver.fuse();
