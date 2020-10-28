@@ -15,6 +15,9 @@ futures = "0.3"
 async-trait = "0.1"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
+console_log = "0.2"
+log = "0.4"
+tokio = "0.3"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
@@ -24,4 +27,10 @@ default = [
     'web-sys/Window',
     'web-sys/IdbFactory',
     'web-sys/IdbOpenDbRequest',
+    'web-sys/IdbDatabase',
+    'web-sys/IdbTransaction',
+    'web-sys/IdbTransactionMode',
+    'web-sys/IdbObjectStore',
+    'tokio/sync',
+    'tokio/macros',
 ]

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait Store {
     // We are using type erasure (dyn Store) in `JSStore` to retain a
     // handle to 'any Store'. Therefore, we apparently can't have a constructor
@@ -11,5 +11,5 @@ pub trait Store {
     async fn get(&self, key: &str) -> Result<Option<String>, ()>;
     async fn put(&mut self, key: &str, value: &str) -> Result<(), ()>;
 
-    fn clear(&mut self);
+    async fn clear(&mut self) -> Result<(), ()>;
 }
