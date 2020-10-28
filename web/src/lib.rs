@@ -73,6 +73,8 @@ pub struct IndexedDBStore {
 
 #[async_trait(?Send)]
 impl Store for IndexedDBStore {
+    // REFACTOR: factor out a `transaction` helper function that prepares
+    // a transaction, executes a passed in closure and cleans up afterwards.
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         // TODO: properly handle and report errors.
         let db = IndexedDBStore::open_db(&self.name).await.unwrap();
