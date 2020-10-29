@@ -20,9 +20,11 @@ use futures::pin_mut;
 use js_sys::Promise;
 
 use web_sys::Event;
+use web_sys::IdbRequest;
 use web_sys::IdbDatabase;
 use web_sys::IdbTransactionMode;
 use web_sys::IdbOpenDbRequest;
+use web_sys::IdbObjectStore;
 
 use log::Level;
 use log::info;
@@ -74,53 +76,13 @@ pub struct IndexedDBStore {
 
 #[async_trait(?Send)]
 impl Store for IndexedDBStore {
-    // REFACTOR: factor out a `transaction` helper function that prepares
-    // a transaction, executes a passed in closure and cleans up afterwards.
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         // TODO: properly handle and report errors.
-        let db = IndexedDBStore::open_db(&self.name).await.unwrap();
-        let transaction = db.transaction_with_str_and_mode("entries", IdbTransactionMode::Readonly).unwrap();
-        let object_store = transaction.object_store("entries").unwrap();
         let key_js = JsValue::from(key);
-        let get_request = object_store.get(&key_js).unwrap();
 
-        let (on_error_sender, on_error_receiver) = oneshot::channel::<Result<(), ()>>();
-        let (on_success_sender, on_success_receiver) = oneshot::channel::<Result<(), ()>>();
-
-        let on_error_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
-            info!("Error occured while trying to get value for key.");
-            // TODO: extract proper error object.
-            on_error_sender.send(Err(())).unwrap();
-        });
-
-        let on_success_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
-            on_success_sender.send(Ok(())).unwrap();
-        });
-
-        get_request.set_onerror(on_error_closure.as_ref().dyn_ref());
-        get_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
-
-        let on_error_receiver_fused = on_error_receiver.fuse();
-        let on_success_receiver_fused = on_success_receiver.fuse();
-
-        pin_mut!(on_error_receiver_fused, on_success_receiver_fused);
-
-        let result: Result<(), ()> = select! {
-            // TODO: pass proper error.
-            _ = on_error_receiver_fused => Err(()),
-            _ = on_success_receiver_fused => Ok(()),
-        };
-
-        result.expect("An error occured while trying to get value for key.");
-        db.close();
-
-        get_request.set_onerror(None);
-        get_request.set_onsuccess(None);
-
-        drop(on_error_closure);
-        drop(on_success_closure);
-
-        let value_js = get_request.result().unwrap();
+        let value_js = self.transaction(IdbTransactionMode::Readonly, move |object_store| {
+            object_store.get(&key_js).unwrap()
+        }).await.unwrap();
 
         if value_js.is_undefined() {
             return Ok(None);
@@ -135,90 +97,22 @@ impl Store for IndexedDBStore {
     }
 
     async fn put(&mut self, key: &str, value: &str) -> Result<(), ()> {
-        // TODO: properly handle and report errors.
-        let db = IndexedDBStore::open_db(&self.name).await.unwrap();
-        let transaction = db.transaction_with_str_and_mode("entries",IdbTransactionMode::Readwrite).unwrap();
-        let object_store = transaction.object_store("entries").unwrap();
         let key_js = JsValue::from(key);
         let value_js = JsValue::from(value);
-        let put_request = object_store.put_with_key(&value_js, &key_js).unwrap();
 
-        let (on_error_sender, on_error_receiver) = oneshot::channel::<Result<(), ()>>();
-        let (on_success_sender, on_success_receiver) = oneshot::channel::<Result<(), ()>>();
+        let _result_js = self.transaction(IdbTransactionMode::Readwrite, move |object_store| {
+            object_store.put_with_key(&value_js, &key_js).unwrap()
+        }).await.unwrap();
 
-        let on_error_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
-            info!("Error occured while trying to put value for key.");
-            // TODO: extract proper error object.
-            on_error_sender.send(Err(())).unwrap();
-        });
-
-        let on_success_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
-            on_success_sender.send(Ok(())).unwrap();
-        });
-
-        put_request.set_onerror(on_error_closure.as_ref().dyn_ref());
-        put_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
-
-        let on_error_receiver_fused = on_error_receiver.fuse();
-        let on_success_receiver_fused = on_success_receiver.fuse();
-        pin_mut!(on_error_receiver_fused, on_success_receiver_fused);
-
-        let result: Result<(), ()> = select! {
-            // TODO: pass proper error.
-            _ = on_error_receiver_fused => Err(()),
-            _ = on_success_receiver_fused => Ok(()),
-        };
-
-        put_request.set_onerror(None);
-        put_request.set_onsuccess(None);
-
-        drop(on_error_closure);
-        drop(on_success_closure);
-
-        db.close();
-        result
+        Ok(())
     }
 
     async fn clear(&mut self) -> Result<(), ()> {
-        let db = IndexedDBStore::open_db(&self.name).await.unwrap();
-        let transaction = db.transaction_with_str_and_mode("entries",IdbTransactionMode::Readwrite).unwrap();
-        let object_store = transaction.object_store("entries").unwrap();
-        let clear_request = object_store.clear().unwrap();
+        let _result_js = self.transaction(IdbTransactionMode::Readwrite, move |object_store| {
+            object_store.clear().unwrap()
+        }).await.unwrap();
 
-        let (on_error_sender, on_error_receiver) = oneshot::channel::<Result<(), ()>>();
-        let (on_success_sender, on_success_receiver) = oneshot::channel::<Result<(), ()>>();
-
-        let on_error_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
-            info!("Error occured while trying to clear.");
-            // TODO: extract proper error object.
-            on_error_sender.send(Err(())).unwrap();
-        });
-
-        let on_success_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
-            on_success_sender.send(Ok(())).unwrap();
-        });
-
-        clear_request.set_onerror(on_error_closure.as_ref().dyn_ref());
-        clear_request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
-
-        let on_error_receiver_fused = on_error_receiver.fuse();
-        let on_success_receiver_fused = on_success_receiver.fuse();
-        pin_mut!(on_error_receiver_fused, on_success_receiver_fused);
-
-        let result: Result<(), ()> = select! {
-            // TODO: pass proper error.
-            _ = on_error_receiver_fused => Err(()),
-            _ = on_success_receiver_fused => Ok(()),
-        };
-
-        clear_request.set_onerror(None);
-        clear_request.set_onsuccess(None);
-
-        drop(on_error_closure);
-        drop(on_success_closure);
-
-        db.close();
-        result
+        Ok(())
     }
 }
 
@@ -283,6 +177,52 @@ impl IndexedDBStore {
         let db = IdbDatabase::from(db_js);
 
         Ok(db)
+    }
+
+    async fn transaction<B>(&self, mode: IdbTransactionMode, block: B) -> Result<JsValue, ()> where B: Fn(IdbObjectStore) -> IdbRequest {
+        let db = IndexedDBStore::open_db(&self.name).await.unwrap();
+        let transaction = db.transaction_with_str_and_mode("entries", mode).unwrap();
+        let object_store = transaction.object_store("entries").unwrap();
+        let request = block(object_store);
+
+        let (on_error_sender, on_error_receiver) = oneshot::channel::<Result<(), ()>>();
+        let (on_success_sender, on_success_receiver) = oneshot::channel::<Result<(), ()>>();
+
+        let on_error_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
+            info!("Error occured while trying to get value for key.");
+            // TODO: extract proper error object.
+            on_error_sender.send(Err(())).unwrap();
+        });
+
+        let on_success_closure: Closure<dyn FnMut(_)> = Closure::once(move |_event: Event| {
+            on_success_sender.send(Ok(())).unwrap();
+        });
+
+        request.set_onerror(on_error_closure.as_ref().dyn_ref());
+        request.set_onsuccess(on_success_closure.as_ref().dyn_ref());
+
+        let on_error_receiver_fused = on_error_receiver.fuse();
+        let on_success_receiver_fused = on_success_receiver.fuse();
+
+        pin_mut!(on_error_receiver_fused, on_success_receiver_fused);
+
+        let result: Result<(), ()> = select! {
+            // TODO: pass proper error.
+            _ = on_error_receiver_fused => Err(()),
+            _ = on_success_receiver_fused => Ok(()),
+        };
+
+        result.expect("An error occured while trying to get value for key.");
+        db.close();
+
+        request.set_onerror(None);
+        request.set_onsuccess(None);
+
+        drop(on_error_closure);
+        drop(on_success_closure);
+
+        let js_value = request.result().unwrap();
+        Ok(js_value)
     }
 }
 
