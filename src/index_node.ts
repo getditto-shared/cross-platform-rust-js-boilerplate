@@ -1,5 +1,2 @@
-export * from "./common"
-import { NativeStore } from "./native";
-export const open = async (): Promise<{ Store: NativeStore }> => {
-  return { Store: NativeStore };
-};
+export * from "./common";
+export { NativeDitto as DittoStore } from "./native";

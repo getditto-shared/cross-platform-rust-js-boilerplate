@@ -18,9 +18,13 @@
     "@types/jest": "^26.0.14",
     "babel-jest": "^26.5.2",
     "jest": "^26.5.3",
+    "karmatic": "^2.1.0",
     "napi-rs": "^0.3.9",
     "rollup": "^2.32.1",
-    "typescript": "^4.0.3"
+    "ts-loader": "^8.0.7",
+    "tslib": "^2.0.3",
+    "typescript": "^4.0.3",
+    "webpack": "<5"
   },
   "os": [
     "darwin",
@@ -36,7 +40,8 @@
     "build-core": "npm run build-core-native && npm run build-core-wasm && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/cjs/. && cp ./native/*.node ./dist/node/es/.",
     "build-typescript": "./node_modules/.bin/tsc",
     "clean": "rm -rf dist",
-    "test": "jest"
+    "test": "jest && npm run test-web",
+    "test-web": "karmatic '**/*.spec.ts'"
   },
   "repository": {
     "type": "git",

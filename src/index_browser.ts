@@ -1,3 +1,2 @@
-export * from "./common"
-import { openWasm } from "./web";
-export const open = openWasm;
+export * from "./common";
+export { WasmDitto as DittoStore } from "./web";
