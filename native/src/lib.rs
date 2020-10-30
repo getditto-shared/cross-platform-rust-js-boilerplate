@@ -11,7 +11,7 @@ pub struct InMemoryStore {
     entries: HashMap<String, String>,
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Store for InMemoryStore {
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         let result = self.entries.get(&key.to_string());
