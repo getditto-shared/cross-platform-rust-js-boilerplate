@@ -76,7 +76,7 @@ fn get(ctx: CallContext<JsObject>) -> napi::Result<JsUndefined> {
     let key = in_key.as_str()?;
 
     let in_value = ctx.get::<JsString>(1)?;
-    let value = in_value.as_str()?; 
+    let value = in_value.as_str()?;
 
     let this: JsObject = ctx.this;
     let store: &mut InMemoryStore = ctx.env.unwrap(&this)?;
