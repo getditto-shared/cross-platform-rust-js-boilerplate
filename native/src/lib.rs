@@ -27,9 +27,10 @@ impl Store for InMemoryStore {
         Ok(())
     }
 
-    fn clear(&mut self) {
+    async fn clear(&mut self) -> Result<(), ()> {
         // TODO: this should probably be async too.
-        self.entries.clear()
+        self.entries.clear();
+        Ok(())
     }
 }
 
