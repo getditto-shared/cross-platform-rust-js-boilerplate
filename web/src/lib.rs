@@ -247,7 +247,9 @@ pub enum JSStoreVariant {
 #[wasm_bindgen]
 pub struct JSStore {
     // TODO: check for thread safety, probably need a replacement for
-    // RefCell, which isn't thread-safe.
+    // RefCell, which isn't thread-safe. Also, we probably won't need
+    // dynamic dispatch since we pick the appropriate implementation
+    // via rollup.js (statically).
     store: Arc<RefCell<dyn Store>>,
 }
 
@@ -255,7 +257,13 @@ pub struct JSStore {
 impl JSStore {
 
     #[wasm_bindgen(constructor)]
-    pub fn new(name: &str, variant: JSStoreVariant) -> Promise {
+    pub fn new(name: &str) -> Promise {
+        // TODO: see TODO comment in struct JSStore, probably no need
+        // for different variants and dynamic dispatch due to rollup.js.
+        // Either get rid of that or make this a parameter and adapt
+        // the native implementation.
+        let variant = JSStoreVariant::IndexedDB;
+
         console_log::init_with_level(Level::Debug).unwrap();
         info!("JSStore infrastructure initialized.");
 
