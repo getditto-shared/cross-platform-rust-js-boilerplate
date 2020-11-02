@@ -1,53 +1,73 @@
-use std::collections::HashMap;
+use common::Store;
+use async_trait::async_trait;
 use node_bindgen::{core::{TryIntoJs, val::JsEnv, NjError}, derive::*};
 use node_bindgen::sys::napi_value;
 
-/// Copied from wasm module -- to be replaced with sled
 #[derive(Debug)]
-pub struct InMemoryStore {
-    entries: HashMap<String, String>,
+pub struct SledStore {
+    db: sled::Db,
 }
 
-impl InMemoryStore {
-    fn new(_name: &str) -> Self {
-        // TODO: use global hash table and reference the entries by name
-        // (so it can be "opened" later on, as with a real implementation
-        // persisting contents).
-        Self {
-            entries: HashMap::new(),
-        }
-    }
-
+// #[async_trait(?Send)]
+impl SledStore {
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
-        let result = self.entries.get(&key.to_string());
-        match result {
-            Some(value) => Ok(Some(value.to_string())),
-            None => Ok(None),
+        // TODO: properly handle errors.
+        match self.db.get(key) {
+            Ok(value_vec_option) => Ok(value_vec_option.map(|value_vec| {
+                let value_data: &[u8] = &value_vec;
+                let value_str = std::str::from_utf8(value_data).unwrap();
+                value_str.to_string()
+            })),
+
+            Err(_error) => Err(())
         }
     }
 
     async fn put(&mut self, key: &str, value: &str) -> Result<(), ()> {
-        // TODO: delay a bit to simulate async.
-        self.entries.insert(key.to_string(), value.to_string());
+        // TODO: properly handle errors.
+        if let Err(_error) = self.db.insert(key, value) {
+            return Err(());
+        }
+
+        if let Err(_error) = self.db.flush_async().await {
+            return Err(());
+        }
+
         Ok(())
     }
 
     async fn clear(&mut self) -> Result<(), ()> {
-        self.entries.clear();
+        // TODO: properly handle errors.
+        if let Err(_error) = self.db.clear() {
+            return Err(());
+        }
+
+        if let Err(_error) = self.db.flush_async().await {
+            return Err(());
+        }
+
         Ok(())
+    }
+}
+
+impl SledStore {
+    fn new(name: &str) -> Self {
+        // TODO: properly handle errors.
+        let db = sled::open(name).unwrap();
+        Self { db: db }
     }
 }
 
 #[derive(Debug)]
 struct NativeStore {
-    store: InMemoryStore,
+    store: SledStore,
 }
 
 #[node_bindgen]
 impl NativeStore {
     #[node_bindgen(constructor)]
     fn new(name: String) -> Self {
-        Self { store: InMemoryStore::new(&name) }
+        Self { store: SledStore::new(&name) }
     }
 
     #[node_bindgen]
