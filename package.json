@@ -35,9 +35,9 @@
     "name": "cross-platform-rust-js-boilerplate"
   },
   "scripts": {
-    "build-core-native": "cd native && cargo build --release && napi build -c ../package.json --platform --release",
+    "build-core-native": "cd native && nj-cli build --release",
     "build-core-wasm": "wasm-pack build -t web --out-dir ../src/web web",
-    "build-core": "npm run build-core-native && npm run build-core-wasm && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/cjs/. && cp ./native/*.node ./dist/node/es/.",
+    "build-core": "npm run build-core-native && npm run build-core-wasm && rm -rf dist/ && rollup -c && cp ./native/dist/*.node ./dist/node/cjs/. && cp ./native/dist/*.node ./dist/node/es/.",
     "build-typescript": "./node_modules/.bin/tsc",
     "clean": "rm -rf dist",
     "test": "jest && npm run test-web",

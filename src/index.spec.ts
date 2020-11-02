@@ -3,9 +3,8 @@ const { DittoStore, Store } = require("..");
 describe("basic storage tests", () => {
   let store: typeof Store = undefined;
 
-  beforeAll(() => {
-    // todo initialize the store.
-    // store = new Store()
+  beforeAll(async () => {
+    store = await DittoStore.load("TestStore");
   });
 
   it("should be a different store impl depending on the backend", async () => {
@@ -16,10 +15,13 @@ describe("basic storage tests", () => {
     }
   });
 
-  it("should be able to write and get a value at a key", async () => {
-    // a poor man's it.skip as karmatic doesn't support the entire jest global API
-    return;
+  it("should store and get hello world", async () => {
+    await store.put("hello", "world");
+    const result = await store.get("hello");
+    expect(result).toEqual("world");
+  });
 
+  it("should be able to write and get a value at a key", async () => {
     let key = generateUUID();
     let valToInsert = generateUUID();
     {

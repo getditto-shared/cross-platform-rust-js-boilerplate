@@ -3,15 +3,13 @@ import init, { JSStore } from "./web/core_web";
 import wasm from "./web/core_web_bg.wasm";
 
 export class WasmStore implements Store {
-  private store: Store;
-  constructor(name: string) {
-    this.store = new JSStore(name);
+  constructor(private store: JSStore) {
   }
 
-  get(key: string): Promise<string | null | undefined> {
+  async get(key: string): Promise<string | null | undefined> {
     return this.store.get(key);
   }
-  put(key: string, value: string): Promise<void> {
+  async put(key: string, value: string): Promise<void> {
     return this.store.put(key, value);
   }
 }
@@ -19,7 +17,8 @@ export class WasmStore implements Store {
 export class WasmDitto {
   static async load(name: string): Promise<Store> {
     await loadWasm();
-    return new WasmStore(name);
+    const store = await new JSStore(name);
+    return new WasmStore(store);
   }
 }
 
