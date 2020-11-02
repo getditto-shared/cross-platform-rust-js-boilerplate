@@ -169,10 +169,6 @@ impl IndexedDBStore {
         open_db_request.set_onerror(None);
         open_db_request.set_onsuccess(None);
 
-        drop(on_upgrade_needed_closure);
-        drop(on_error_closure);
-        drop(on_success_closure);
-
         let db_js = open_db_request.result().unwrap();
         let db = IdbDatabase::from(db_js);
 
@@ -217,9 +213,6 @@ impl IndexedDBStore {
 
         request.set_onerror(None);
         request.set_onsuccess(None);
-
-        drop(on_error_closure);
-        drop(on_success_closure);
 
         let js_value = request.result().unwrap();
         Ok(js_value)
