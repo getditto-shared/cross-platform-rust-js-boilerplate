@@ -2,4 +2,6 @@ dist
 node_modules
 **/target
 pkg
+pkg-*
 *.node
+coverage/

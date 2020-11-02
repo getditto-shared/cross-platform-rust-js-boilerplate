@@ -11,15 +11,8 @@ pub struct InMemoryStore {
     entries: HashMap<String, String>,
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Store for InMemoryStore {
-    fn new(_name: &str) -> Self {
-        // TODO: use global hash table and reference the entries by name
-        // (so it can be "opened" later on, as with a real implementation
-        // persisting contents).
-        Self { entries: HashMap::new() }
-    }
-
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         let result = self.entries.get(&key.to_string());
         match result {
@@ -34,9 +27,19 @@ impl Store for InMemoryStore {
         Ok(())
     }
 
-    fn clear(&mut self) {
+    async fn clear(&mut self) -> Result<(), ()> {
         // TODO: this should probably be async too.
-        self.entries.clear()
+        self.entries.clear();
+        Ok(())
+    }
+}
+
+impl InMemoryStore {
+    fn new(_name: &str) -> Self {
+        // TODO: use global hash table and reference the entries by name
+        // (so it can be "opened" later on, as with a real implementation
+        // persisting contents).
+        Self { entries: HashMap::new() }
     }
 }
 
@@ -73,7 +76,7 @@ fn get(ctx: CallContext<JsObject>) -> napi::Result<JsUndefined> {
     let key = in_key.as_str()?;
 
     let in_value = ctx.get::<JsString>(1)?;
-    let value = in_value.as_str()?; 
+    let value = in_value.as_str()?;
 
     let this: JsObject = ctx.this;
     let store: &mut InMemoryStore = ctx.env.unwrap(&this)?;
