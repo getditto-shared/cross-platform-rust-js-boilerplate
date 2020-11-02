@@ -9,7 +9,7 @@ use common::Store;
 
 use std::collections::HashMap;
 use std::cell::RefCell;
-use std::sync::Arc;
+use std::rc::Rc;
 use std::marker::Send;
 
 use futures::select;
@@ -239,11 +239,9 @@ pub enum JSStoreVariant {
 
 #[wasm_bindgen]
 pub struct JSStore {
-    // TODO: check for thread safety, probably need a replacement for
-    // RefCell, which isn't thread-safe. Also, we probably won't need
-    // dynamic dispatch since we pick the appropriate implementation
-    // via rollup.js (statically).
-    store: Arc<RefCell<dyn Store>>,
+    // TODO: get rid of dyn here. We probably won't need dynamic dispatch since
+    // we pick the appropriate implementation via rollup.js (statically).
+    store: Rc<RefCell<dyn Store>>,
 }
 
 #[wasm_bindgen]
@@ -266,14 +264,14 @@ impl JSStore {
                 JSStoreVariant::InMemory => {
                     let store = InMemoryStore::new(&name);
                     let store_ref_celled = RefCell::new(store);
-                    let store_reference_counted = Arc::new(store_ref_celled);
+                    let store_reference_counted = Rc::new(store_ref_celled);
                     Ok(JsValue::from(Self { store: store_reference_counted }))
                 }
 
                 JSStoreVariant::IndexedDB => {
                     let store = IndexedDBStore::new(&name).await;
                     let store_ref_celled = RefCell::new(store);
-                    let store_reference_counted = Arc::new(store_ref_celled);
+                    let store_reference_counted = Rc::new(store_ref_celled);
                     Ok(JsValue::from(Self { store: store_reference_counted }))
                 }
             }
