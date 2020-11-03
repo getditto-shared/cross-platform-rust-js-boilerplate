@@ -12,6 +12,11 @@ pub struct SledStore {
 impl SledStore {
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         // TODO: properly handle errors.
+
+        if let Err(_error) = self.db.flush_async().await {
+            return Err(());
+        }
+
         match self.db.get(key) {
             Ok(value_vec_option) => Ok(value_vec_option.map(|value_vec| {
                 let value_data: &[u8] = &value_vec;
