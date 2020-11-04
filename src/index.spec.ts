@@ -4,7 +4,7 @@ describe("basic storage tests", () => {
   let store: typeof Store = undefined;
 
   beforeAll(async () => {
-    store = await DittoStore.load("TestStore");
+    store = await DittoStore.open("TestStore");
   });
 
   it("should be a different store impl depending on the backend", async () => {

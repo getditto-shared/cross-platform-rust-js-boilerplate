@@ -15,7 +15,7 @@ export class WasmStore implements Store {
 }
 
 export class WasmDitto {
-  static async load(name: string): Promise<Store> {
+  static async open(name: string): Promise<Store> {
     await loadWasm();
     const store = await new JSStore(name);
     return new WasmStore(store);

@@ -16,7 +16,7 @@ export class NativeStore implements Store {
 }
 
 export class NativeDitto {
-  static async load(name: string): Promise<Store> {
+  static async open(name: string): Promise<Store> {
     return new NativeStore(name);
   }
 }
