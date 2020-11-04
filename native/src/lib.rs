@@ -1,9 +1,6 @@
 use std::collections::HashMap;
-
-use common::Store;
-use async_trait::async_trait;
-use napi::{CallContext, JsFunction, JsObject, JsString, JsUndefined, Module, Property, register_module};
-use napi_derive::js_function;
+use node_bindgen::{core::{TryIntoJs, val::JsEnv, NjError}, derive::*};
+use node_bindgen::sys::napi_value;
 
 /// Copied from wasm module -- to be replaced with sled
 #[derive(Debug)]
@@ -11,13 +8,21 @@ pub struct InMemoryStore {
     entries: HashMap<String, String>,
 }
 
-#[async_trait(?Send)]
-impl Store for InMemoryStore {
+impl InMemoryStore {
+    fn new(_name: &str) -> Self {
+        // TODO: use global hash table and reference the entries by name
+        // (so it can be "opened" later on, as with a real implementation
+        // persisting contents).
+        Self {
+            entries: HashMap::new(),
+        }
+    }
+
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         let result = self.entries.get(&key.to_string());
         match result {
             Some(value) => Ok(Some(value.to_string())),
-            None => Ok(None)
+            None => Ok(None),
         }
     }
 
@@ -28,81 +33,48 @@ impl Store for InMemoryStore {
     }
 
     async fn clear(&mut self) -> Result<(), ()> {
-        // TODO: this should probably be async too.
         self.entries.clear();
         Ok(())
     }
 }
 
-impl InMemoryStore {
-    fn new(_name: &str) -> Self {
-        // TODO: use global hash table and reference the entries by name
-        // (so it can be "opened" later on, as with a real implementation
-        // persisting contents).
-        Self { entries: HashMap::new() }
+#[derive(Debug)]
+struct NativeStore {
+    store: InMemoryStore,
+}
+
+#[node_bindgen]
+impl NativeStore {
+    #[node_bindgen(constructor)]
+    fn new(name: String) -> Self {
+        Self { store: InMemoryStore::new(&name) }
+    }
+
+    #[node_bindgen]
+    async fn get(&self, key: String) -> NapiOptString {
+        self.store.get(&key).await.map(NapiOptString).unwrap()
+    }
+
+    #[node_bindgen]
+    async fn put(&mut self, key: String, value: String) {
+        self.store.put(&key, &value).await.unwrap()
+    }
+
+    #[node_bindgen]
+    async fn clear(&mut self) {
+        self.store.clear().await.unwrap()
     }
 }
 
-#[js_function(1)]
-fn create_native_store_class(ctx: CallContext) -> napi::Result<JsFunction> {
-    let add_get_method = Property::new(&ctx.env, "get")?.with_method(get);
-    let add_put_method = Property::new(&ctx.env, "put")?.with_method(put);
-    let add_clear_method = Property::new(&ctx.env, "clear")?.with_method(clear);
-    let properties = vec![
-        add_get_method,
-        add_put_method,
-        add_clear_method,
-    ];
-    ctx.env.define_class(
-        "NativeStore",
-        native_store_constructor,
-        properties.as_slice(),
-    )
+// wait for https://github.com/infinyon/node-bindgen/issues/33
+struct NapiOptString(Option<String>);
+
+impl TryIntoJs for NapiOptString {
+    fn try_to_js(self, js_env: &JsEnv) -> Result<napi_value,NjError> {
+        if let Some(x) = self.0 {
+            js_env.create_string_utf8(&x)
+        } else {
+            js_env.get_undefined()
+        }
+    }
 }
-
-#[js_function(1)]
-fn native_store_constructor(ctx: CallContext<JsObject>) -> napi::Result<JsUndefined> {
-    let in_string = ctx.get::<JsString>(0)?;
-    let name = in_string.as_str()?;
-
-    let mut this = ctx.this;
-    ctx.env.wrap(&mut this, InMemoryStore::new(name))?;
-    ctx.env.get_undefined()
-}
-
-#[js_function(1)]
-fn get(ctx: CallContext<JsObject>) -> napi::Result<JsUndefined> {
-    let in_key = ctx.get::<JsString>(0)?;
-    let key = in_key.as_str()?;
-
-    let in_value = ctx.get::<JsString>(1)?;
-    let value = in_value.as_str()?;
-
-    let this: JsObject = ctx.this;
-    let store: &mut InMemoryStore = ctx.env.unwrap(&this)?;
-    todo!();
-    // ctx.env.get_undefined()
-}
-
-#[js_function(1)]
-fn put(ctx: CallContext<JsObject>) -> napi::Result<JsUndefined> {
-    let this: JsObject = ctx.this;
-    let store: &mut InMemoryStore = ctx.env.unwrap(&this)?;
-    store.clear();
-    ctx.env.get_undefined()
-}
-
-#[js_function(1)]
-fn clear(ctx: CallContext<JsObject>) -> napi::Result<JsUndefined> {
-    let this: JsObject = ctx.this;
-    let store: &mut InMemoryStore = ctx.env.unwrap(&this)?;
-    store.clear();
-    ctx.env.get_undefined()
-}
-
-fn init(module: &mut Module) -> napi::Result<()> {
-    module.create_named_method("createNativeStoreClass", create_native_store_class)?;
-    Ok(())
-}
-
-register_module!(test_module, init);

@@ -1,11 +1,8 @@
 import type { Store } from "./common";
-import { platform } from "os";
 
-const MODULE_NAME = "cross-platform-rust-js-boilerplate";
 const {
-  createNativeStoreClass,
-} = require(`./${MODULE_NAME}.${platform()}.node`);
-const InternalStore = createNativeStoreClass();
+  NativeStore: InternalStore,
+} = require(`./index.node`);
 
 export class NativeStore implements Store {
   private inner: typeof InternalStore;
