@@ -9,8 +9,13 @@ export class WasmStore implements Store {
   async get(key: string): Promise<string | null | undefined> {
     return this.store.get(key);
   }
+
   async put(key: string, value: string): Promise<void> {
     return this.store.put(key, value);
+  }
+
+  async clear(): Promise<void> {
+    return this.store.clear();
   }
 }
 
