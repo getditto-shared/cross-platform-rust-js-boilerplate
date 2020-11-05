@@ -41,7 +41,7 @@
     "build-typescript": "./node_modules/.bin/tsc",
     "clean": "rm -rf dist",
     "test": "jest && npm run test-web",
-    "test-web": "karmatic '**/*.spec.ts'"
+    "test-web": "karmatic **/*.spec.ts"
   },
   "repository": {
     "type": "git",
