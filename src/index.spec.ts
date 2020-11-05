@@ -4,7 +4,7 @@ describe("basic storage tests", () => {
   let store: typeof Store = undefined;
 
   beforeAll(async () => {
-    store = await DittoStore.load("TestStore");
+    store = await DittoStore.open("TestStore");
   });
 
   it("should be a different store impl depending on the backend", async () => {
@@ -33,6 +33,31 @@ describe("basic storage tests", () => {
       const val = await store.get(key);
       expect(val).toEqual(valToInsert);
     }
+  });
+
+  it("should be able to clear all entries", async () => {
+    let key1 = "key1";
+    let key2 = "key2";
+    let key3 = "key3";
+
+    let value1 = "value1";
+    let value2 = "value2";
+    let value3 = "value3";
+
+    await store.put(key1, value1);
+    await store.put(key2, value2);
+    await store.put(key3, value3);
+
+    expect(await store.get(key1)).toEqual(value1);
+    expect(await store.get(key2)).toEqual(value2);
+    expect(await store.get(key3)).toEqual(value3);
+
+    await store.clear();
+
+    expect(await store.get(key1)).toBeUndefined();
+    expect(await store.get(key2)).toBeUndefined();
+    expect(await store.get(key3)).toBeUndefined();
+
   });
 });
 

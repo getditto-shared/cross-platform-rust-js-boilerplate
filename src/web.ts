@@ -1,23 +1,28 @@
 import type { Store } from "./common";
-import init, { JSStore } from "./web/core_web";
+import init, { WasmStore as InternalStore } from "./web/core_web";
 import wasm from "./web/core_web_bg.wasm";
 
 export class WasmStore implements Store {
-  constructor(private store: JSStore) {
+  constructor(private store: InternalStore) {
   }
 
   async get(key: string): Promise<string | null | undefined> {
     return this.store.get(key);
   }
+
   async put(key: string, value: string): Promise<void> {
     return this.store.put(key, value);
+  }
+
+  async clear(): Promise<void> {
+    return this.store.clear();
   }
 }
 
 export class WasmDitto {
-  static async load(name: string): Promise<Store> {
+  static async open(name: string): Promise<Store> {
     await loadWasm();
-    const store = await new JSStore(name);
+    const store = await new InternalStore(name);
     return new WasmStore(store);
   }
 }

@@ -6,17 +6,18 @@ const {
 
 export class NativeStore implements Store {
   private inner: typeof InternalStore;
+
   constructor(name: string) {
     this.inner = new InternalStore(name);
   }
 
   get = (key: string): Promise<string> => this.inner.get(key);
-  put = (key: string, value: string): Promise<void> =>
-    this.inner.put(key, value);
+  put = (key: string, value: string): Promise<void> => this.inner.put(key, value);
+  clear = (): Promise<void> => this.inner.clear();
 }
 
 export class NativeDitto {
-  static async load(name: string): Promise<Store> {
+  static async open(name: string): Promise<Store> {
     return new NativeStore(name);
   }
 }

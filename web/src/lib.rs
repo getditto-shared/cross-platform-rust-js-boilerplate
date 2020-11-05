@@ -178,17 +178,17 @@ impl IndexedDBStore {
 }
 
 #[wasm_bindgen]
-pub struct JSStore {
+pub struct WasmStore {
     store: Rc<RefCell<IndexedDBStore>>,
 }
 
 #[wasm_bindgen]
-impl JSStore {
+impl WasmStore {
 
     #[wasm_bindgen(constructor)]
     pub fn new(name: &str) -> Promise {
         console_log::init_with_level(Level::Debug).unwrap();
-        info!("JSStore infrastructure initialized.");
+        info!("WasmStore infrastructure initialized.");
 
         let name = name.to_string();
         let future = async move {
