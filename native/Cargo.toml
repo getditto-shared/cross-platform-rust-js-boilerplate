@@ -8,7 +8,10 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
+common = { path = "../common" }
 node-bindgen = { version = "3.0.0" }
+async-trait = "0.1"
+sled = "0.34"
 
 [build-dependencies]
 node-bindgen = { version = "3.0.0", features = ["build"] }

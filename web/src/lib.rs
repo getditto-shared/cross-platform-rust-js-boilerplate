@@ -7,10 +7,8 @@ use wasm_bindgen_futures::*;
 
 use common::Store;
 
-use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::marker::Send;
 
 use futures::select;
 use futures::channel::oneshot;
@@ -28,46 +26,6 @@ use web_sys::IdbObjectStore;
 
 use log::Level;
 use log::info;
-
-#[derive(Debug)]
-pub struct InMemoryStore {
-    entries: HashMap<String, String>,
-}
-
-#[async_trait(?Send)]
-impl Store for InMemoryStore {
-    async fn get(&self, key: &str) -> Result<Option<String>, ()> {
-        let result = self.entries.get(&key.to_string());
-        match result {
-            Some(value) => Ok(Some(value.to_string())),
-            None => Ok(None)
-        }
-    }
-
-    async fn put(&mut self, key: &str, value: &str) -> Result<(), ()> {
-        // TODO: delay a bit to simulate async.
-        self.entries.insert(key.to_string(), value.to_string());
-        Ok(())
-    }
-
-    async fn clear(&mut self) -> Result<(), ()> {
-        // TODO: delay a bit to simulate async.
-        self.entries.clear();
-        Ok(())
-    }
-}
-
-impl InMemoryStore {
-    fn new(_name: &str) -> Self {
-        // TODO: use global hash table and reference the entries by name
-        // (so it can be "opened" later on, as with a real implementation
-        // persisting contents).
-        Self { entries: HashMap::new() }
-    }
-}
-
-// HACK: get rid of std::marker::Send errors.
-unsafe impl Send for InMemoryStore {}
 
 #[derive(Debug)]
 pub struct IndexedDBStore {
@@ -219,29 +177,9 @@ impl IndexedDBStore {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_example() {
-        // Nothing here yet, all good.
-    }
-}
-
-#[wasm_bindgen]
-// NOTE: can't use term `Type` here, conflicts with keyword `type` and
-// leads to weird variable names. Therefore "variant" it is.
-pub enum JSStoreVariant {
-    InMemory,
-    IndexedDB
-}
-
 #[wasm_bindgen]
 pub struct JSStore {
-    // TODO: get rid of dyn here. We probably won't need dynamic dispatch since
-    // we pick the appropriate implementation via rollup.js (statically).
-    store: Rc<RefCell<dyn Store>>,
+    store: Rc<RefCell<IndexedDBStore>>,
 }
 
 #[wasm_bindgen]
@@ -249,33 +187,17 @@ impl JSStore {
 
     #[wasm_bindgen(constructor)]
     pub fn new(name: &str) -> Promise {
-        // TODO: see TODO comment in struct JSStore, probably no need
-        // for different variants and dynamic dispatch due to rollup.js.
-        // Either get rid of that or make this a parameter and adapt
-        // the native implementation.
-        let variant = JSStoreVariant::IndexedDB;
-
         console_log::init_with_level(Level::Debug).unwrap();
         info!("JSStore infrastructure initialized.");
 
         let name = name.to_string();
         let future = async move {
-            match variant {
-                JSStoreVariant::InMemory => {
-                    let store = InMemoryStore::new(&name);
-                    let store_ref_celled = RefCell::new(store);
-                    let store_reference_counted = Rc::new(store_ref_celled);
-                    Ok(JsValue::from(Self { store: store_reference_counted }))
-                }
-
-                JSStoreVariant::IndexedDB => {
-                    let store = IndexedDBStore::new(&name).await;
-                    let store_ref_celled = RefCell::new(store);
-                    let store_reference_counted = Rc::new(store_ref_celled);
-                    Ok(JsValue::from(Self { store: store_reference_counted }))
-                }
-            }
+            let store = IndexedDBStore::new(&name).await;
+            let store_ref_celled = RefCell::new(store);
+            let store_reference_counted = Rc::new(store_ref_celled);
+            Ok(JsValue::from(Self { store: store_reference_counted }))
         };
+        
         future_to_promise(future)
     }
 
@@ -283,6 +205,7 @@ impl JSStore {
     pub fn get(&self, key: &str) -> Promise {
         let store = self.store.clone();
         let key = key.to_string();
+        
         let future = async move {
             let store = store.borrow();
             let result = store.get(&key).await;
@@ -291,6 +214,7 @@ impl JSStore {
                 Err(_error) => Err(JsValue::undefined())
             }
         };
+
         future_to_promise(future)
     }
 
@@ -299,6 +223,7 @@ impl JSStore {
         let store = self.store.clone();
         let key = key.to_string();
         let value = value.to_string();
+        
         let future = async move {
             let mut store = store.borrow_mut();
             let result = store.put(&key, &value).await;
@@ -307,12 +232,14 @@ impl JSStore {
                 Err(_error) => Err(JsValue::undefined())
             }
         };
+
         future_to_promise(future)
     }
 
     #[wasm_bindgen]
     pub fn clear(&self) -> Promise {
         let store = self.store.clone();
+        
         let future = async move {
             let mut store = store.borrow_mut();
             let result = store.clear().await;
@@ -321,6 +248,7 @@ impl JSStore {
                 Err(_error) => Err(JsValue::undefined())
             }
         };
+
         future_to_promise(future)
     }
 }
