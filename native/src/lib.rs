@@ -10,7 +10,7 @@ pub struct SledStore {
 
 // #[async_trait(?Send)]
 impl SledStore {
-    async fn get(&self, key: &str) -> Result<Option<String>, ()> {
+    fn get(&self, key: &str) -> Result<Option<String>, ()> {
         // TODO: properly handle errors.
 
         if let Err(_error) = self.db.flush() {
@@ -28,7 +28,7 @@ impl SledStore {
         }
     }
 
-    async fn put(&mut self, key: &str, value: &str) -> Result<(), ()> {
+    fn put(&mut self, key: &str, value: &str) -> Result<(), ()> {
         // TODO: properly handle errors.
         if let Err(_error) = self.db.insert(key, value) {
             return Err(());
@@ -41,7 +41,7 @@ impl SledStore {
         Ok(())
     }
 
-    async fn clear(&mut self) -> Result<(), ()> {
+    fn clear(&mut self) -> Result<(), ()> {
         // TODO: properly handle errors.
         if let Err(_error) = self.db.clear() {
             return Err(());
@@ -76,18 +76,18 @@ impl NativeStore {
     }
 
     #[node_bindgen]
-    async fn get(&self, key: String) -> NapiOptString {
-        self.store.get(&key).await.map(NapiOptString).unwrap()
+    fn get(&self, key: String) -> NapiOptString {
+        self.store.get(&key).map(NapiOptString).unwrap()
     }
 
     #[node_bindgen]
-    async fn put(&mut self, key: String, value: String) {
-        self.store.put(&key, &value).await.unwrap()
+    fn put(&mut self, key: String, value: String) {
+        self.store.put(&key, &value).unwrap()
     }
 
     #[node_bindgen]
-    async fn clear(&mut self) {
-        self.store.clear().await.unwrap()
+    fn clear(&mut self) {
+        self.store.clear().unwrap()
     }
 }
 
