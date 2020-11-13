@@ -13,7 +13,7 @@ impl SledStore {
     async fn get(&self, key: &str) -> Result<Option<String>, ()> {
         // TODO: properly handle errors.
 
-        if let Err(_error) = self.db.flush_async().await {
+        if let Err(_error) = self.db.flush() {
             return Err(());
         }
 
@@ -34,7 +34,7 @@ impl SledStore {
             return Err(());
         }
 
-        if let Err(_error) = self.db.flush_async().await {
+        if let Err(_error) = self.db.flush() {
             return Err(());
         }
 
@@ -47,7 +47,7 @@ impl SledStore {
             return Err(());
         }
 
-        if let Err(_error) = self.db.flush_async().await {
+        if let Err(_error) = self.db.flush() {
             return Err(());
         }
 
