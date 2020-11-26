@@ -1006,9 +1006,9 @@ dependencies = [
 
 [[package]]
 name = "nj-core"
-version = "3.0.0"
+version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9860508161fd33bc7e71b54654cbc93c83badc7ac3c8ca127fe3f79d97fe8fb"
+checksum = "d5e65d2daecb585f5888cff21b3f8dbef823e5809cbdeea76d507660377850ab"
 dependencies = [
  "async-trait",
  "ctor",
@@ -1018,14 +1018,15 @@ dependencies = [
  "libc",
  "log",
  "nj-sys",
+ "num-bigint",
  "pin-utils",
 ]
 
 [[package]]
 name = "nj-derive"
-version = "2.1.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3541112a74780a2ec4b69217f13d5671200ac4b8923186633ffc1a1557793377"
+checksum = "b087de4c9209a8a6f00e51354df424e6ca10871940e7a38f305f01a2e10aa600"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -1035,20 +1036,31 @@ dependencies = [
 
 [[package]]
 name = "nj-sys"
-version = "1.0.0"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "265486f44e56487f1fceb7f8637344f0a0c7764940ab0e8b52eb12f53a16b3d4"
+checksum = "8de78f0e9f8a2a4f224273e282f9b61bfe8d598b22fe9d00a57b09e1f6b1cd51"
 
 [[package]]
 name = "node-bindgen"
-version = "3.0.0"
+version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c77203d98d0af996e120922e7a22c777c038e0f2aa96b01a4403889ccd40aa78"
+checksum = "5a06858504ad7d2dd74fc7407b972261e74dedd5ebba82921bfb44a261d4d846"
 dependencies = [
  "nj-build",
  "nj-core",
  "nj-derive",
  "nj-sys",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e9a41747ae4633fce5adffb4d2e81ffc5e89593cb19917f8fb2cc5ff76507bf"
+dependencies = [
+ "autocfg",
+ "num-integer",
+ "num-traits",
 ]
 
 [[package]]
