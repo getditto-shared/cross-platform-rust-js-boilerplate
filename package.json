@@ -39,7 +39,7 @@
     "build-core": "npm run build-core-native && npm run build-core-wasm && rm -rf dist/ && rollup -c && cp ./native/dist/*.node ./dist/node/cjs/. && cp ./native/dist/*.node ./dist/node/es/.",
     "build-typescript": "./node_modules/.bin/tsc",
     "clean": "rm -rf dist",
-    "test": "jest && npm run test-web",
+    "test": "jest --runInBand && npm run test-web",
     "test-web": "karmatic **/*.spec.ts"
   },
   "repository": {
